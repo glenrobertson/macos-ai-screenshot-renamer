@@ -2,8 +2,6 @@
 
 Use Apple Intelligence to automatically rename screenshots with descriptive filenames via Automator and Shortcuts.
 
-Transform `Screenshot 2024-04-04 at 2.35.12 PM.png` into `xcode-debug-console-error-log.png`
-
 ![Demo](demo.gif)
 
 ## How It Works

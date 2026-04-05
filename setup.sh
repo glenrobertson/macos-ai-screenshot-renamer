@@ -3,9 +3,12 @@
 set -e
 
 SCREENSHOTS_DIR="$HOME/Screenshots"
-WORKFLOW_NAME="Rename Screenshot.workflow"
 SHORTCUT_NAME="Rename Screenshot.shortcut"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+WATCHER_SCRIPT="$HOME/Library/Scripts/rename-new-screenshots.sh"
+LAUNCH_AGENT_PLIST="$HOME/Library/LaunchAgents/com.parkade.screenshot-renamer.plist"
+LAUNCH_AGENT_LABEL="com.parkade.screenshot-renamer"
 
 echo "Screenshot Renamer Setup"
 echo "========================"
@@ -20,13 +23,7 @@ echo "Setting macOS screenshot location..."
 defaults write com.apple.screencapture location "$SCREENSHOTS_DIR"
 killall SystemUIServer 2>/dev/null || true
 
-# 3. Install the Folder Action workflow
-echo "Installing Folder Action workflow..."
-WORKFLOW_DEST="$HOME/Library/Workflows/Applications/Folder Actions"
-mkdir -p "$WORKFLOW_DEST"
-cp -R "$SCRIPT_DIR/$WORKFLOW_NAME" "$WORKFLOW_DEST/"
-
-# 4. Install the Shortcut
+# 3. Install the Shortcut
 SHORTCUT_PATH="$SCRIPT_DIR/$SHORTCUT_NAME"
 if [ -f "$SHORTCUT_PATH" ]; then
     echo "Installing Shortcut (click 'Add Shortcut' when prompted)..."
@@ -37,34 +34,68 @@ else
     echo "WARNING: $SHORTCUT_NAME not found. Please install manually."
 fi
 
-# 5. Enable Folder Actions and attach to Screenshots folder
-echo "Enabling Folder Actions..."
-osascript <<EOF
-tell application "System Events"
-    set folder actions enabled to true
-end tell
-EOF
+# 4. Install the watcher script
+echo "Installing watcher script..."
+mkdir -p "$HOME/Library/Scripts"
+cat > "$WATCHER_SCRIPT" <<'WATCHER'
+#!/bin/zsh
+# Called by launchd WatchPaths whenever ~/Screenshots changes.
+# Finds screenshots that still have the default macOS name and renames them
+# via the "Rename Screenshot" Shortcut.
 
-# Attach the folder action to the Screenshots directory
-osascript <<EOF
-tell application "System Events"
-    set screenshotsFolder to POSIX file "$SCREENSHOTS_DIR" as alias
-    set workflowPath to POSIX file "$WORKFLOW_DEST/$WORKFLOW_NAME" as alias
+SCREENSHOTS_DIR="$HOME/Screenshots"
+TIMESTAMP_FILE="$HOME/Library/Scripts/.rename-screenshot-lastrun"
 
-    try
-        make new folder action with properties {name:"$SCREENSHOTS_DIR", path:screenshotsFolder}
-    end try
+if [[ ! -f "$TIMESTAMP_FILE" ]]; then
+    touch -t 197001010000 "$TIMESTAMP_FILE"
+fi
 
-    tell folder action "$SCREENSHOTS_DIR"
-        try
-            make new script with properties {name:"$WORKFLOW_NAME", path:workflowPath}
-        end try
-    end tell
-end tell
-EOF
+# Small sleep to let the screenshot finish writing to disk
+sleep 2
+
+find "$SCREENSHOTS_DIR" -maxdepth 1 -name "Screenshot *.png" -newer "$TIMESTAMP_FILE" | while IFS= read -r file; do
+    shortcuts run "Rename Screenshot" --input-path "$file"
+done
+
+touch "$TIMESTAMP_FILE"
+WATCHER
+chmod +x "$WATCHER_SCRIPT"
+
+# 5. Install and load the Launch Agent
+echo "Installing Launch Agent..."
+mkdir -p "$HOME/Library/LaunchAgents"
+cat > "$LAUNCH_AGENT_PLIST" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>$LAUNCH_AGENT_LABEL</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>$WATCHER_SCRIPT</string>
+    </array>
+    <key>WatchPaths</key>
+    <array>
+        <string>$SCREENSHOTS_DIR</string>
+    </array>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>$HOME/Library/Logs/rename-screenshot.log</string>
+    <key>StandardErrorPath</key>
+    <string>$HOME/Library/Logs/rename-screenshot.log</string>
+</dict>
+</plist>
+PLIST
+
+# Unload first if already running
+launchctl unload "$LAUNCH_AGENT_PLIST" 2>/dev/null || true
+launchctl load "$LAUNCH_AGENT_PLIST"
 
 echo
 echo "Done! Screenshot location set to: $SCREENSHOTS_DIR"
 echo
-echo "You may need to grant permissions in System Settings > Privacy & Security."
 echo "Take a screenshot (Cmd+Shift+4) to test it!"
+echo "Logs: $HOME/Library/Logs/rename-screenshot.log"

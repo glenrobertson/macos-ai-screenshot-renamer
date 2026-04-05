@@ -20,7 +20,7 @@ Use Apple Intelligence to automatically rename screenshots with descriptive file
 ```bash
 git clone https://github.com/glenrobertson/macos-ai-screenshot-renamer.git
 cd macos-ai-screenshot-renamer
-./setup.sh
+./install.sh
 ```
 
 Click **"Add Shortcut"** when prompted, then grant any permissions in **System Settings > Privacy & Security**.
@@ -32,6 +32,8 @@ Click **"Add Shortcut"** when prompted, then grant any permissions in **System S
 - Imports the Shortcut
 - Installs a watcher script at `~/Library/Scripts/rename-new-screenshots.sh`
 - Installs and loads a Launch Agent at `~/Library/LaunchAgents/com.parkade.screenshot-renamer.plist`
+
+Run `./uninstall.sh` to reverse these changes.
 
 ## Test It
 
@@ -102,10 +104,12 @@ Logs are written to `~/Library/Logs/rename-screenshot.log`.
 ## Uninstall
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.parkade.screenshot-renamer.plist
-rm ~/Library/LaunchAgents/com.parkade.screenshot-renamer.plist
-rm ~/Library/Scripts/rename-new-screenshots.sh
+./uninstall.sh
 ```
+
+This will unload and remove the Launch Agent, remove the watcher script, and reset the screenshot save location back to Desktop.
+
+The `~/Screenshots` folder and the "Rename Screenshot" Shortcut are left in place — delete them manually if you no longer need them.
 
 ## License
 

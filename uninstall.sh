@@ -2,7 +2,7 @@
 
 set -e
 
-LAUNCH_AGENT_PLIST="$HOME/Library/LaunchAgents/com.parkade.screenshot-renamer.plist"
+LAUNCH_AGENT_PLIST="$HOME/Library/LaunchAgents/nz.glen.screenshot-renamer.plist"
 
 echo "Screenshot Renamer Uninstall"
 echo "============================"

@@ -31,7 +31,7 @@ Click **"Add Shortcut"** when prompted, then grant any permissions in **System S
 - Sets macOS to save screenshots there (`defaults write com.apple.screencapture location`)
 - Imports the Shortcut
 - Installs a watcher script at `~/Library/Scripts/rename-new-screenshots.sh`
-- Installs and loads a Launch Agent at `~/Library/LaunchAgents/com.parkade.screenshot-renamer.plist`
+- Installs and loads a Launch Agent at `~/Library/LaunchAgents/nz.glen.screenshot-renamer.plist`
 
 Run `./uninstall.sh` to reverse these changes.
 
@@ -73,13 +73,13 @@ Logs are written to `~/Library/Logs/rename-screenshot.log`.
 4. Create and load the Launch Agent:
    ```bash
    mkdir -p ~/Library/LaunchAgents
-   cat > ~/Library/LaunchAgents/com.parkade.screenshot-renamer.plist <<EOF
+   cat > ~/Library/LaunchAgents/nz.glen.screenshot-renamer.plist <<EOF
    <?xml version="1.0" encoding="UTF-8"?>
    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
    <plist version="1.0">
    <dict>
        <key>Label</key>
-       <string>com.parkade.screenshot-renamer</string>
+       <string>nz.glen.screenshot-renamer</string>
        <key>ProgramArguments</key>
        <array>
            <string>/bin/zsh</string>
@@ -98,7 +98,7 @@ Logs are written to `~/Library/Logs/rename-screenshot.log`.
    </dict>
    </plist>
    EOF
-   launchctl load ~/Library/LaunchAgents/com.parkade.screenshot-renamer.plist
+   launchctl load ~/Library/LaunchAgents/nz.glen.screenshot-renamer.plist
    ```
 
 ## Uninstall

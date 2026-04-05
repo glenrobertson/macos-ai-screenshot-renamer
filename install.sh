@@ -7,8 +7,8 @@ SHORTCUT_NAME="Rename Screenshot.shortcut"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 WATCHER_SCRIPT="$HOME/Library/Scripts/rename-new-screenshots.sh"
-LAUNCH_AGENT_PLIST="$HOME/Library/LaunchAgents/com.parkade.screenshot-renamer.plist"
-LAUNCH_AGENT_LABEL="com.parkade.screenshot-renamer"
+LAUNCH_AGENT_PLIST="$HOME/Library/LaunchAgents/nz.glen.screenshot-renamer.plist"
+LAUNCH_AGENT_LABEL="nz.glen.screenshot-renamer"
 
 echo "Screenshot Renamer Setup"
 echo "========================"

@@ -18,7 +18,7 @@ Use Apple Intelligence to automatically rename screenshots with descriptive file
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/macos-ai-screenshot-renamer.git
+git clone https://github.com/glenrobertson/macos-ai-screenshot-renamer.git
 cd macos-ai-screenshot-renamer
 ./setup.sh
 ```

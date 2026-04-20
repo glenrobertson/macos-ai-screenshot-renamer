@@ -17,6 +17,14 @@ Use Apple Intelligence to automatically rename screenshots with descriptive file
 
 ## Installation
 
+### Option 1: Installer Package (recommended)
+
+Download `Screenshot Renamer.pkg` from the [latest release](https://github.com/glenrobertson/macos-ai-screenshot-renamer/releases) and double-click to install.
+
+Click **"Add Shortcut"** when prompted, then grant any permissions in **System Settings > Privacy & Security**.
+
+### Option 2: Command Line
+
 ```bash
 git clone https://github.com/glenrobertson/macos-ai-screenshot-renamer.git
 cd macos-ai-screenshot-renamer
@@ -102,6 +110,8 @@ Logs are written to `~/Library/Logs/rename-screenshot.log`.
    ```
 
 ## Uninstall
+
+If you installed via the `.pkg`, double-click `Uninstall Screenshot Renamer.pkg` from the [latest release](https://github.com/glenrobertson/macos-ai-screenshot-renamer/releases). Otherwise:
 
 ```bash
 ./uninstall.sh

@@ -1,0 +1,29 @@
+#!/bin/bash
+# postinstall script for Screenshot Renamer Uninstaller
+
+set -e
+
+CURRENT_USER=$( /usr/bin/stat -f "%Su" /dev/console )
+CURRENT_USER_HOME=$( /usr/bin/dscl . -read /Users/"$CURRENT_USER" NFSHomeDirectory | /usr/bin/awk '{print $NF}' )
+CURRENT_USER_UID=$( /usr/bin/id -u "$CURRENT_USER" )
+
+LAUNCH_AGENT_PLIST="$CURRENT_USER_HOME/Library/LaunchAgents/nz.glen.screenshot-renamer.plist"
+
+# Unload and remove Launch Agent
+if [ -f "$LAUNCH_AGENT_PLIST" ]; then
+    /bin/launchctl asuser "$CURRENT_USER_UID" /bin/launchctl unload "$LAUNCH_AGENT_PLIST" 2>/dev/null || true
+    rm -f "$LAUNCH_AGENT_PLIST"
+fi
+
+# Remove watcher script and timestamp file
+rm -f "$CURRENT_USER_HOME/Library/Scripts/rename-new-screenshots.sh"
+rm -f "$CURRENT_USER_HOME/Library/Scripts/.rename-screenshot-lastrun"
+
+# Reset screenshot location to Desktop
+/usr/bin/sudo -u "$CURRENT_USER" defaults write com.apple.screencapture location "$CURRENT_USER_HOME/Desktop"
+killall SystemUIServer 2>/dev/null || true
+
+# Clean up any leftover staging
+rm -rf /usr/local/share/screenshot-renamer
+
+exit 0

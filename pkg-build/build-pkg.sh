@@ -37,6 +37,9 @@ PAYLOAD_DIR="$BUILD_DIR/payload"
 mkdir -p "$PAYLOAD_DIR/usr/local/share/screenshot-renamer"
 cp "$PROJECT_DIR/Rename Screenshot.shortcut" "$PAYLOAD_DIR/usr/local/share/screenshot-renamer/"
 cp "$PROJECT_DIR/install.sh" "$PAYLOAD_DIR/usr/local/share/screenshot-renamer/"
+cp "$PROJECT_DIR/uninstall.sh" "$PAYLOAD_DIR/usr/local/share/screenshot-renamer/"
+chmod +x "$PAYLOAD_DIR/usr/local/share/screenshot-renamer/install.sh"
+chmod +x "$PAYLOAD_DIR/usr/local/share/screenshot-renamer/uninstall.sh"
 
 # Make scripts executable
 chmod +x "$SCRIPT_DIR/scripts/postinstall"
@@ -85,3 +88,6 @@ fi
 
 echo
 echo "Done! Packages are in: $BUILD_DIR/"
+echo
+echo "SHA256 (paste into Casks/screenshot-renamer.rb):"
+shasum -a 256 "$BUILD_DIR/Screenshot Renamer.pkg" | awk '{print $1}'

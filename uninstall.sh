@@ -49,8 +49,9 @@ echo "Resetting screenshot location to Desktop..."
 "${AS_USER[@]}" defaults write com.apple.screencapture location "$USER_HOME/Desktop"
 killall SystemUIServer 2>/dev/null || true
 
-# Clean up any leftover staging from pkg install
-rm -rf /usr/local/share/screenshot-renamer
+# Clean up any leftover staging from pkg install. May fail if invoked
+# without root (e.g. direct CLI run) — harmless either way.
+rm -rf /usr/local/share/screenshot-renamer 2>/dev/null || true
 
 echo
 echo "Done."

@@ -8,7 +8,9 @@ STAGING="/usr/local/share/screenshot-renamer"
 
 "$STAGING/install.sh" "$STAGING/Rename Screenshot.shortcut"
 
-# Clean up staging area
-rm -rf "$STAGING"
+# Clean up install-only artifacts but leave uninstall.sh in place so the
+# Homebrew cask (and manual uninstall) can call it back later.
+rm -f "$STAGING/install.sh"
+rm -rf "$STAGING/Rename Screenshot.shortcut"
 
 exit 0

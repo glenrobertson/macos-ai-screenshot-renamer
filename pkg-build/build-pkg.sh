@@ -12,6 +12,21 @@ BUILD_DIR="$SCRIPT_DIR/out"
 IDENTIFIER="nz.glen.screenshot-renamer"
 VERSION="1.0"
 
+# Signing & notarization (opt-in: SIGN=1 ./build-pkg.sh)
+# Requires:
+#   - "Developer ID Installer" cert in Keychain
+#   - Notarization credentials stored via:
+#     xcrun notarytool store-credentials "notary-gxlabs" \
+#         --apple-id <apple-id> --team-id 57MXTRM398 --password <app-specific-pw>
+SIGN_IDENTITY="${SIGN_IDENTITY:-Developer ID Installer: gxlabs LLC (57MXTRM398)}"
+NOTARY_PROFILE="${NOTARY_PROFILE:-notary-gxlabs}"
+
+SIGN_ARGS=()
+if [[ "$SIGN" == "1" ]]; then
+    echo "Signing enabled (identity: $SIGN_IDENTITY)"
+    SIGN_ARGS=(--sign "$SIGN_IDENTITY")
+fi
+
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
@@ -31,6 +46,7 @@ pkgbuild \
     --identifier "$IDENTIFIER" \
     --version "$VERSION" \
     --scripts "$SCRIPT_DIR/scripts" \
+    "${SIGN_ARGS[@]}" \
     "$BUILD_DIR/Screenshot Renamer.pkg"
 
 echo "Built: $BUILD_DIR/Screenshot Renamer.pkg"
@@ -45,9 +61,22 @@ pkgbuild \
     --identifier "$IDENTIFIER.uninstall" \
     --version "$VERSION" \
     --scripts "$SCRIPT_DIR/scripts-uninstall" \
+    "${SIGN_ARGS[@]}" \
     "$BUILD_DIR/Uninstall Screenshot Renamer.pkg"
 
 echo "Built: $BUILD_DIR/Uninstall Screenshot Renamer.pkg"
+
+# Notarize & staple if signing is enabled
+if [[ "$SIGN" == "1" ]]; then
+    echo
+    echo "Submitting packages for notarization..."
+    for pkg in "$BUILD_DIR/Screenshot Renamer.pkg" "$BUILD_DIR/Uninstall Screenshot Renamer.pkg"; do
+        echo "Notarizing: $pkg"
+        xcrun notarytool submit "$pkg" --keychain-profile "$NOTARY_PROFILE" --wait
+        xcrun stapler staple "$pkg"
+        echo "Notarized and stapled: $pkg"
+    done
+fi
 
 echo
 echo "Done! Packages are in: $BUILD_DIR/"

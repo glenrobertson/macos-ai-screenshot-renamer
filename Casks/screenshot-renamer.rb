@@ -1,6 +1,6 @@
 cask "screenshot-renamer" do
   version "1.0"
-  sha256 "REPLACE_WITH_SHA256_FROM_build-pkg.sh"
+  sha256 "27245759aad4e550fc1b98f752b2a1ebc529d148f72ff8e4ae5f7ae2e9186909-pkg.sh"
 
   # GitHub replaces spaces in asset filenames with dots in the download URL.
   url "https://github.com/glenrobertson/macos-ai-screenshot-renamer/releases/download/v#{version}/Screenshot.Renamer.pkg"

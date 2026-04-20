@@ -2,6 +2,7 @@
 # Install Screenshot Renamer.
 # Works both as a normal user (CLI install) and as root (pkg postinstall).
 # Usage: install.sh [shortcut_path]
+# Set SCREENSHOTS_DIR in the environment to skip the directory prompt.
 
 set -e
 
@@ -23,7 +24,7 @@ else
 fi
 
 SHORTCUT_PATH="${1:-$SCRIPT_DIR/Rename Screenshot.shortcut}"
-SCREENSHOTS_DIR="$USER_HOME/Screenshots"
+DEFAULT_SCREENSHOTS_DIR="$USER_HOME/Screenshots"
 WATCHER_SCRIPT="$USER_HOME/Library/Scripts/rename-new-screenshots.sh"
 LAUNCH_AGENT_PLIST="$USER_HOME/Library/LaunchAgents/nz.glen.screenshot-renamer.plist"
 LAUNCH_AGENT_LABEL="nz.glen.screenshot-renamer"
@@ -32,8 +33,40 @@ echo "Screenshot Renamer Setup"
 echo "========================"
 echo
 
-# 1. Create Screenshots directory
-echo "Creating $SCREENSHOTS_DIR..."
+# 1. Ask the user where screenshots should live.
+#    - Env var SCREENSHOTS_DIR wins (scripted installs).
+#    - Interactive terminal: read with default.
+#    - No TTY (pkg postinstall runs as root, no stdin): AppleScript dialog as the console user.
+#    Only files matching "Screenshot *.png" are ever renamed, so choosing a shared
+#    folder like ~/Desktop won't touch unrelated files.
+if [ -z "$SCREENSHOTS_DIR" ]; then
+    if [ -t 0 ]; then
+        printf "Where should screenshots be saved? [%s]: " "$DEFAULT_SCREENSHOTS_DIR"
+        read -r SCREENSHOTS_DIR
+    else
+        SCREENSHOTS_DIR=$("${AS_USER[@]}" /usr/bin/osascript <<OSA 2>/dev/null || true
+try
+    set reply to text returned of (display dialog "Folder to save screenshots in:" default answer "$DEFAULT_SCREENSHOTS_DIR" with title "Screenshot Renamer")
+    return reply
+on error number -128
+    return ""
+end try
+OSA
+)
+    fi
+fi
+SCREENSHOTS_DIR="${SCREENSHOTS_DIR:-$DEFAULT_SCREENSHOTS_DIR}"
+# Expand leading ~ to the user's home
+case "$SCREENSHOTS_DIR" in
+    "~") SCREENSHOTS_DIR="$USER_HOME" ;;
+    "~/"*) SCREENSHOTS_DIR="$USER_HOME/${SCREENSHOTS_DIR#~/}" ;;
+esac
+# Strip trailing slash
+SCREENSHOTS_DIR="${SCREENSHOTS_DIR%/}"
+
+echo "Using screenshots directory: $SCREENSHOTS_DIR"
+
+# Create the directory if it doesn't exist
 mkdir -p "$SCREENSHOTS_DIR"
 [ -n "$CHOWN" ] && chown "$CHOWN" "$SCREENSHOTS_DIR"
 
@@ -55,27 +88,28 @@ fi
 # 4. Install the watcher script
 echo "Installing watcher script..."
 mkdir -p "$USER_HOME/Library/Scripts"
-cat > "$WATCHER_SCRIPT" <<'WATCHER'
+cat > "$WATCHER_SCRIPT" <<WATCHER
 #!/bin/zsh
-# Called by launchd WatchPaths whenever ~/Screenshots changes.
+# Called by launchd WatchPaths whenever the screenshots dir changes.
 # Finds screenshots that still have the default macOS name and renames them
-# via the "Rename Screenshot" Shortcut.
+# via the "Rename Screenshot" Shortcut. The "Screenshot *.png" glob is the
+# guard that keeps unrelated files in a shared folder (e.g. ~/Desktop) safe.
 
-SCREENSHOTS_DIR="$HOME/Screenshots"
-TIMESTAMP_FILE="$HOME/Library/Scripts/.rename-screenshot-lastrun"
+SCREENSHOTS_DIR="$SCREENSHOTS_DIR"
+TIMESTAMP_FILE="\$HOME/Library/Scripts/.rename-screenshot-lastrun"
 
-if [[ ! -f "$TIMESTAMP_FILE" ]]; then
-    touch -t 197001010000 "$TIMESTAMP_FILE"
+if [[ ! -f "\$TIMESTAMP_FILE" ]]; then
+    touch -t 197001010000 "\$TIMESTAMP_FILE"
 fi
 
 # Small sleep to let the screenshot finish writing to disk
 sleep 2
 
-find "$SCREENSHOTS_DIR" -maxdepth 1 -name "Screenshot *.png" -newer "$TIMESTAMP_FILE" | while IFS= read -r file; do
-    shortcuts run "Rename Screenshot" --input-path "$file"
+find "\$SCREENSHOTS_DIR" -maxdepth 1 -name "Screenshot *.png" -newer "\$TIMESTAMP_FILE" | while IFS= read -r file; do
+    shortcuts run "Rename Screenshot" --input-path "\$file"
 done
 
-touch "$TIMESTAMP_FILE"
+touch "\$TIMESTAMP_FILE"
 WATCHER
 chmod +x "$WATCHER_SCRIPT"
 [ -n "$CHOWN" ] && chown "$CHOWN" "$WATCHER_SCRIPT"

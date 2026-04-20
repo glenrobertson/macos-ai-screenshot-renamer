@@ -32,10 +32,11 @@ mkdir -p "$BUILD_DIR"
 
 # --- Install PKG ---
 
-# Prepare payload: just the .shortcut file in a staging directory
+# Prepare payload: shortcut + install.sh in a staging directory
 PAYLOAD_DIR="$BUILD_DIR/payload"
 mkdir -p "$PAYLOAD_DIR/usr/local/share/screenshot-renamer"
 cp "$PROJECT_DIR/Rename Screenshot.shortcut" "$PAYLOAD_DIR/usr/local/share/screenshot-renamer/"
+cp "$PROJECT_DIR/install.sh" "$PAYLOAD_DIR/usr/local/share/screenshot-renamer/"
 
 # Make scripts executable
 chmod +x "$SCRIPT_DIR/scripts/postinstall"
@@ -53,11 +54,15 @@ echo "Built: $BUILD_DIR/Screenshot Renamer.pkg"
 
 # --- Uninstall PKG ---
 
-# Uninstaller is script-only (nopayload)
+# Prepare payload: uninstall.sh in a staging directory
+UNINSTALL_PAYLOAD_DIR="$BUILD_DIR/payload-uninstall"
+mkdir -p "$UNINSTALL_PAYLOAD_DIR/usr/local/share/screenshot-renamer"
+cp "$PROJECT_DIR/uninstall.sh" "$UNINSTALL_PAYLOAD_DIR/usr/local/share/screenshot-renamer/"
+
 chmod +x "$SCRIPT_DIR/scripts-uninstall/postinstall"
 
 pkgbuild \
-    --nopayload \
+    --root "$UNINSTALL_PAYLOAD_DIR" \
     --identifier "$IDENTIFIER.uninstall" \
     --version "$VERSION" \
     --scripts "$SCRIPT_DIR/scripts-uninstall" \

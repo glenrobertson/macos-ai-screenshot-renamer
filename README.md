@@ -6,9 +6,13 @@ Use Apple Intelligence to automatically rename screenshots with descriptive file
 
 ## How It Works
 
-1. **launchd Launch Agent** watches `~/Screenshots` for new files
+1. **launchd Launch Agent** watches your chosen screenshots folder for new files
 2. **Shortcut** sends the image to Apple Intelligence for analysis
 3. Screenshot is renamed with an AI-generated description
+
+Only files whose names start with `Screenshot ` (the default macOS filename) are
+renamed, so you can safely point the watcher at a shared folder like `~/Desktop`
+without touching unrelated files.
 
 ## Requirements
 
@@ -21,7 +25,7 @@ Use Apple Intelligence to automatically rename screenshots with descriptive file
 
 Download `Screenshot Renamer.pkg` from the [latest release](https://github.com/glenrobertson/macos-ai-screenshot-renamer/releases) and double-click to install.
 
-Click **"Add Shortcut"** when prompted, then grant any permissions in **System Settings > Privacy & Security**.
+You'll be prompted to pick a folder for screenshots (defaults to `~/Screenshots`). Then click **"Add Shortcut"** when prompted, and grant any permissions in **System Settings > Privacy & Security**.
 
 ### Option 2: Command Line
 
@@ -31,11 +35,11 @@ cd macos-ai-screenshot-renamer
 ./install.sh
 ```
 
-Click **"Add Shortcut"** when prompted, then grant any permissions in **System Settings > Privacy & Security**.
+The installer will ask where to save screenshots (defaults to `~/Screenshots`; set `SCREENSHOTS_DIR=...` in the environment to skip the prompt). Then click **"Add Shortcut"** when prompted, and grant any permissions in **System Settings > Privacy & Security**.
 
 ## What Setup Does
 
-- Creates `~/Screenshots` directory
+- Asks for a screenshots folder (default `~/Screenshots`) and creates it
 - Sets macOS to save screenshots there (`defaults write com.apple.screencapture location`)
 - Imports the Shortcut
 - Installs a watcher script at `~/Library/Scripts/rename-new-screenshots.sh`
@@ -119,7 +123,7 @@ If you installed via the `.pkg`, double-click `Uninstall Screenshot Renamer.pkg`
 
 This will unload and remove the Launch Agent, remove the watcher script, and reset the screenshot save location back to Desktop.
 
-The `~/Screenshots` folder and the "Rename Screenshot" Shortcut are left in place — delete them manually if you no longer need them.
+Your screenshots folder and the "Rename Screenshot" Shortcut are left in place — delete them manually if you no longer need them.
 
 ## License
 

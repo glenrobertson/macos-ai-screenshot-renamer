@@ -2,8 +2,7 @@ cask "screenshot-renamer" do
   version "1.0"
   sha256 "27245759aad4e550fc1b98f752b2a1ebc529d148f72ff8e4ae5f7ae2e9186909-pkg.sh"
 
-  # GitHub replaces spaces in asset filenames with dots in the download URL.
-  url "https://github.com/glenrobertson/macos-ai-screenshot-renamer/releases/download/v#{version}/Screenshot.Renamer.pkg"
+  url "https://github.com/glenrobertson/macos-ai-screenshot-renamer/releases/download/v#{version}/Screenshot-Renamer.pkg"
   name "Screenshot Renamer"
   desc "Auto-rename screenshots with Apple Intelligence"
   homepage "https://github.com/glenrobertson/macos-ai-screenshot-renamer"
@@ -11,7 +10,7 @@ cask "screenshot-renamer" do
   depends_on macos: ">= :sequoia"
   depends_on arch: :arm64
 
-  pkg "Screenshot Renamer.pkg"
+  pkg "Screenshot-Renamer.pkg"
 
   # uninstall.sh is left on disk by the install pkg's postinstall so the cask
   # can reuse the same teardown (unload launchd agent, remove plist + watcher

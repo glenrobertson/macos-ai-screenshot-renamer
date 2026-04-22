@@ -23,14 +23,6 @@ echo "Screenshot Renamer Uninstall"
 echo "============================"
 echo
 
-# Recover the screenshots dir the user picked at install time, so we can restore
-# the macOS default location correctly. Falls back to ~/Screenshots.
-SCREENSHOTS_DIR=""
-if [ -f "$LAUNCH_AGENT_PLIST" ]; then
-    SCREENSHOTS_DIR=$(/usr/libexec/PlistBuddy -c "Print :WatchPaths:0" "$LAUNCH_AGENT_PLIST" 2>/dev/null || true)
-fi
-SCREENSHOTS_DIR="${SCREENSHOTS_DIR:-$USER_HOME/Screenshots}"
-
 # Unload and remove Launch Agent
 if [ -f "$LAUNCH_AGENT_PLIST" ]; then
     echo "Unloading Launch Agent..."
@@ -55,5 +47,5 @@ rm -rf /usr/local/share/screenshot-renamer 2>/dev/null || true
 
 echo
 echo "Done."
-echo "The 'Rename Screenshot' Shortcut and $SCREENSHOTS_DIR were not removed."
+echo "The 'Rename Screenshot' Shortcut and screenshots directory were not removed."
 echo "Delete them manually if you no longer need them."

@@ -124,11 +124,19 @@ sleep 2
 while :; do
     MARKER=\$(mktemp)
     found=0
+    files=()
     while IFS= read -r file; do
         [[ -f "\$file" ]] || continue
-        shortcuts run "Rename Screenshot" --input-path "\$file" >/dev/null
+        # Move to a temp name immediately so a second launchd invocation
+        # cannot find the same file via the "Screenshot *.png" glob.
+        tmp="\${file}.processing"
+        mv "\$file" "\$tmp" 2>/dev/null || continue
+        files+=("\$tmp")
         found=1
     done < <(find "\$SCREENSHOTS_DIR" -maxdepth 1 -name "Screenshot *.png" -newer "\$TIMESTAMP_FILE" ! -newer "\$MARKER")
+    for tmp in "\${files[@]}"; do
+        shortcuts run "Rename Screenshot" --input-path "\$tmp" >/dev/null
+    done
     touch -r "\$MARKER" "\$TIMESTAMP_FILE"
     rm -f "\$MARKER"
     (( found == 0 )) && break

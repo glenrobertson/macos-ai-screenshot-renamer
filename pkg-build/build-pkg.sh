@@ -1,8 +1,8 @@
 #!/bin/bash
 # Build macOS .pkg installers for Screenshot Renamer
 # Produces:
-#   Screenshot Renamer.pkg          (installer)
-#   Uninstall Screenshot Renamer.pkg (uninstaller)
+#   Screenshot-Renamer.pkg          (installer)
+#   Uninstall-Screenshot-Renamer.pkg (uninstaller)
 
 set -e
 
@@ -51,9 +51,9 @@ pkgbuild \
     --version "$VERSION" \
     --scripts "$SCRIPT_DIR/scripts" \
     "${SIGN_ARGS[@]}" \
-    "$BUILD_DIR/Screenshot Renamer.pkg"
+    "$BUILD_DIR/Screenshot-Renamer.pkg"
 
-echo "Built: $BUILD_DIR/Screenshot Renamer.pkg"
+echo "Built: $BUILD_DIR/Screenshot-Renamer.pkg"
 
 # --- Uninstall PKG ---
 
@@ -70,15 +70,15 @@ pkgbuild \
     --version "$VERSION" \
     --scripts "$SCRIPT_DIR/scripts-uninstall" \
     "${SIGN_ARGS[@]}" \
-    "$BUILD_DIR/Uninstall Screenshot Renamer.pkg"
+    "$BUILD_DIR/Uninstall-Screenshot-Renamer.pkg"
 
-echo "Built: $BUILD_DIR/Uninstall Screenshot Renamer.pkg"
+echo "Built: $BUILD_DIR/Uninstall-Screenshot-Renamer.pkg"
 
 # Notarize & staple if signing is enabled
 if [[ "$SIGN" == "1" ]]; then
     echo
     echo "Submitting packages for notarization..."
-    for pkg in "$BUILD_DIR/Screenshot Renamer.pkg" "$BUILD_DIR/Uninstall Screenshot Renamer.pkg"; do
+    for pkg in "$BUILD_DIR/Screenshot-Renamer.pkg" "$BUILD_DIR/Uninstall-Screenshot-Renamer.pkg"; do
         echo "Notarizing: $pkg"
         xcrun notarytool submit "$pkg" --keychain-profile "$NOTARY_PROFILE" --wait
         xcrun stapler staple "$pkg"
@@ -90,4 +90,4 @@ echo
 echo "Done! Packages are in: $BUILD_DIR/"
 echo
 echo "SHA256 (paste into Casks/screenshot-renamer.rb):"
-shasum -a 256 "$BUILD_DIR/Screenshot Renamer.pkg" | awk '{print $1}'
+shasum -a 256 "$BUILD_DIR/Screenshot-Renamer.pkg" | awk '{print $1}'

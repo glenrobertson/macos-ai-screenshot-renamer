@@ -88,6 +88,3 @@ fi
 
 echo
 echo "Done! Packages are in: $BUILD_DIR/"
-echo
-echo "SHA256 (paste into Casks/screenshot-renamer.rb):"
-shasum -a 256 "$BUILD_DIR/Screenshot-Renamer.pkg" | awk '{print $1}'

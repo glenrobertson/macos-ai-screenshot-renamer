@@ -21,21 +21,13 @@ without touching unrelated files.
 
 ## Installation
 
-### Option 1: Homebrew
-
-```bash
-brew install --cask https://raw.githubusercontent.com/glenrobertson/macos-ai-screenshot-renamer/main/Casks/screenshot-renamer.rb
-```
-
-You'll be prompted to pick a folder for screenshots (defaults to `~/Screenshots`). Then click **"Add Shortcut"** when prompted, and grant any permissions in **System Settings > Privacy & Security**. Uninstall with `brew uninstall --cask screenshot-renamer`.
-
-### Option 2: Installer Package
+### Option 1: Installer Package
 
 Download `Screenshot-Renamer.pkg` from the [latest release](https://github.com/glenrobertson/macos-ai-screenshot-renamer/releases) and double-click to install.
 
 You'll be prompted to pick a folder for screenshots (defaults to `~/Screenshots`). Then click **"Add Shortcut"** when prompted, and grant any permissions in **System Settings > Privacy & Security**.
 
-### Option 3: Command Line
+### Option 2: Command Line
 
 ```bash
 git clone https://github.com/glenrobertson/macos-ai-screenshot-renamer.git
@@ -122,8 +114,6 @@ Logs are written to `~/Library/Logs/rename-screenshot.log`.
    ```
 
 ## Uninstall
-
-If you installed via Homebrew: `brew uninstall --cask screenshot-renamer`.
 
 If you installed via the `.pkg`, double-click `Uninstall-Screenshot-Renamer.pkg` from the [latest release](https://github.com/glenrobertson/macos-ai-screenshot-renamer/releases). Otherwise:
 

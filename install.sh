@@ -97,19 +97,42 @@ cat > "$WATCHER_SCRIPT" <<WATCHER
 
 SCREENSHOTS_DIR="$SCREENSHOTS_DIR"
 TIMESTAMP_FILE="\$HOME/Library/Scripts/.rename-screenshot-lastrun"
+LOCK_DIR="\$HOME/Library/Scripts/.rename-screenshot.lock"
 
 if [[ ! -f "\$TIMESTAMP_FILE" ]]; then
     touch -t 197001010000 "\$TIMESTAMP_FILE"
 fi
 
-# Small sleep to let the screenshot finish writing to disk
+# WatchPaths fires multiple fsevents per screenshot save. Without a lock the
+# parallel runs race the Shortcut's move and produce "item with the same
+# name already exists" errors. Stale locks >5min get reclaimed.
+if ! mkdir "\$LOCK_DIR" 2>/dev/null; then
+    if [[ -z \$(find "\$LOCK_DIR" -maxdepth 0 -mmin -5 2>/dev/null) ]]; then
+        rmdir "\$LOCK_DIR" 2>/dev/null
+        mkdir "\$LOCK_DIR" 2>/dev/null || exit 0
+    else
+        exit 0
+    fi
+fi
+trap 'rmdir "\$LOCK_DIR" 2>/dev/null' EXIT INT TERM
+
 sleep 2
 
-find "\$SCREENSHOTS_DIR" -maxdepth 1 -name "Screenshot *.png" -newer "\$TIMESTAMP_FILE" | while IFS= read -r file; do
-    shortcuts run "Rename Screenshot" --input-path "\$file"
+# Loop so screenshots arriving while the Shortcut is running are still
+# picked up. MARKER bounds each pass so files landing after find but before
+# the timestamp advance aren't skipped.
+while :; do
+    MARKER=\$(mktemp)
+    found=0
+    while IFS= read -r file; do
+        [[ -f "\$file" ]] || continue
+        shortcuts run "Rename Screenshot" --input-path "\$file" >/dev/null
+        found=1
+    done < <(find "\$SCREENSHOTS_DIR" -maxdepth 1 -name "Screenshot *.png" -newer "\$TIMESTAMP_FILE" ! -newer "\$MARKER")
+    touch -r "\$MARKER" "\$TIMESTAMP_FILE"
+    rm -f "\$MARKER"
+    (( found == 0 )) && break
 done
-
-touch "\$TIMESTAMP_FILE"
 WATCHER
 chmod +x "$WATCHER_SCRIPT"
 [ -n "$CHOWN" ] && chown "$CHOWN" "$WATCHER_SCRIPT"
